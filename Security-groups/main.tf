@@ -1,6 +1,7 @@
 variable "ec2_sg_name" {}
 variable "vpc_id" {}
 variable "ec2_jenkins_sg_name" {}
+variable "ip_address" {}
 
 output "sg_ec2_sg_ssh_http_id" {
     value = aws_security_group.ec2_sg_ssh_http.id
@@ -17,8 +18,8 @@ resource "aws_security_group" "ec2_sg_ssh_http" {
 
   # ssh for terraform remote exec
   ingress {
-    description = "Allow remote SSH from anywhere"
-    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow remote SSH from my ip"
+    cidr_blocks = [var.ip_address]
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -26,8 +27,8 @@ resource "aws_security_group" "ec2_sg_ssh_http" {
 
   # enable http
   ingress {
-    description = "Allow HTTP request from anywhere"
-    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTP request from my ip"
+    cidr_blocks = [var.ip_address]
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -35,8 +36,8 @@ resource "aws_security_group" "ec2_sg_ssh_http" {
 
   # enable http
   ingress {
-    description = "Allow HTTP request from anywhere"
-    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTP request from ip"
+    cidr_blocks = [var.ip_address]
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -64,13 +65,13 @@ resource "aws_security_group" "ec2_jenkins_port_8080" {
   # ssh for terraform remote exec
   ingress {
     description = "Allow 8080 port to access jenkins"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.ip_address]
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
   }
 
   tags = {
-    Name = "Security Groups to allow SSH(22) and HTTP(80)"
+       Name = "Security Groups to allow SSH(22) and HTTP(80)"
   }
 }
