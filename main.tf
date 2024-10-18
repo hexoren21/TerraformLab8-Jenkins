@@ -14,6 +14,7 @@ module "security_group" {
   ec2_jenkins_sg_name = "Allow port 8080 for jenkins"
   ip_address          = var.my_ip
   lb_sg_name = "SG for lb to enable HTTPS(443) and HTTP(80)"
+  ec2_sonarqube_sg_name = "SG for SonarQube to enable SSH(22), HTTP(80) and SQ(9000)"
 }
 
 module "jenkins" {
@@ -26,6 +27,18 @@ module "jenkins" {
   sg_for_jenkins            = [module.security_group.sg_ec2_sg_ssh_http_id, module.security_group.sg_ec2_jenkins_port_8080]
   enable_public_ip_address  = true
   user_data_install_jenkins = templatefile("./Jenkins-runner-script/jenkins-installer.sh", {})
+}
+
+module "sonarqube" {
+  source                    = "./SonarQube"
+  ami_id                    = var.ec2_ami_id
+  instance_type             = "t2.medium"
+  tag_name                  = "SonarQube:ubuntu Linux EC2"
+  public_key                = var.public_key
+  subnet_id                 = tolist(module.networking.dev_proj_public_subnets)[0]
+  sg_for_sonarqube            = [module.security_group.sg_ec2_sonarqube_id]
+  enable_public_ip_address  = true
+  user_data_install_sonarqube = templatefile("./SonarQube-runner-script/snarqube-installer.sh", {})
 }
 
 module "lb_target_group" {

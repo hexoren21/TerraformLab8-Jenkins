@@ -3,6 +3,7 @@ variable "vpc_id" {}
 variable "ec2_jenkins_sg_name" {}
 variable "ip_address" {}
 variable "lb_sg_name" {}
+variable "ec2_sonarqube_sg_name" {}
 
 output "sg_ec2_sg_ssh_http_id" {
     value = aws_security_group.ec2_sg_ssh_http.id
@@ -15,6 +16,11 @@ output "sg_ec2_jenkins_port_8080" {
 output "lb_sg_ssh_http_id" {
     value = aws_security_group.lb_sg_ssh_http.id
 }
+
+output "sg_ec2_sonarqube_id" {
+    value = aws_security_group.ec2_sonarqube.id
+}
+
 
 resource "aws_security_group" "ec2_sg_ssh_http" {
   name        = var.ec2_sg_name
@@ -124,5 +130,49 @@ resource "aws_security_group" "lb_sg_ssh_http" {
 
   tags = {
     Name = "Security Groups lb to allow HTTP(80) and HTTPS(443)"
+  }
+}
+
+resource "aws_security_group" "ec2_sonarqube" {
+  name        = var.ec2_sonarqube_sg_name
+  description = "Enable the Port for sonarqube"
+  vpc_id      = var.vpc_id
+
+  # ssh for terraform remote exec
+  ingress {
+    description = "Allow 22 port to access sonarqube"
+    cidr_blocks = [var.ip_address]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+  }
+
+   ingress {
+    description = "Allow 80 port to access sonarqube"
+    cidr_blocks = [var.ip_address]
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+  }
+
+  ingress {
+    description = "Allow 9000 port to access sonarqube"
+    cidr_blocks = [var.ip_address]
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+  }
+
+    #Outgoing request
+  egress {
+    description = "Allow outgoing request"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+       Name = "Security Groups to allow SSH(22) and HTTP(80) HTTP(9000)"
   }
 }
