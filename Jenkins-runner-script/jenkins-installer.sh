@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo apt-get update
-yes | sudo apt install openjdk-11-jdk-headless
+yes | sudo apt install fontconfig openjdk-17-jre
 echo "Waiting for 30 seconds before installing the jenkins package..."
 sleep 30
 sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
@@ -16,3 +16,5 @@ wget https://releases.hashicorp.com/terraform/1.6.5/terraform_1.6.5_linux_386.zi
 yes | sudo apt-get install unzip
 unzip 'terraform*.zip'
 sudo mv terraform /usr/local/bin/ 
+sudo systemctl enable jenkins
+sudo systemctl start jenkins

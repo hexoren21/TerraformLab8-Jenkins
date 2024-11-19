@@ -15,8 +15,20 @@ module "security_group" {
   ip_address          = var.my_ip
   lb_sg_name = "SG for lb to enable HTTPS(443) and HTTP(80)"
   ec2_sonarqube_sg_name = "SG for SonarQube to enable SSH(22), HTTP(80) and SQ(9000)"
+  ec2_docker_sg_name = "SG for Docker to enable SSH(22), HTTP(80)"
 }
 
+module "docker" {
+  source                    = "./Docker"
+  ami_id                    = var.ec2_ami_id
+  instance_type             = "t2.medium"
+  tag_name                  = "Docker:ubuntu Linux EC2"
+  public_key                = var.public_key
+  subnet_id                 = tolist(module.networking.dev_proj_public_subnets)[0]
+  sg_for_docker            = [module.security_group.sg_ec2_docker_id]
+  enable_public_ip_address  = true
+  user_data_install_docker = templatefile("./Docker-runner-script/docker-installer.sh", {})
+}
 module "jenkins" {
   source                    = "./Jenkins"
   ami_id                    = var.ec2_ami_id
